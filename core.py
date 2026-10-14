@@ -88,20 +88,20 @@ def valida_cartao(v) -> str:
     return "Corrigir o campo Cartão Utilizado"
 
 
-def _valida_valor(v, msg: str) -> str:
+def _valida_valor(v, msg: str, vazio: str) -> str:
     v = _s(v)
     if not v:
-        return AGUARDANDO
+        return vazio
     if _eq(v, NAO):
         return OK
     n = parse_valor(v)
     return OK if n is not None and 0 <= n <= MAX_VALOR else msg
 
 
-def valida_markup(v): return _valida_valor(v, "Corrigir Markup Total")
-def valida_fee(v): return _valida_valor(v, "Corrigir Fee/RC")
-def valida_incentivo(v): return _valida_valor(v, "Corrigir Incentivo")
-def valida_rav(v): return _valida_valor(v, "Corrigir RAV")
+def valida_markup(v): return _valida_valor(v, "Corrigir Markup Total", "Insira o markup (0 se não houver)")
+def valida_fee(v): return _valida_valor(v, "Corrigir Fee/RC", "Insira o FEE/RC (0 se não houver)")
+def valida_incentivo(v): return _valida_valor(v, "Corrigir Incentivo", "Insira o incentivo (0 se não houver)")
+def valida_rav(v): return _valida_valor(v, "Corrigir RAV", "Insira o RAV (0 se não houver)")
 
 
 def valida_produto(v) -> str:
@@ -111,7 +111,7 @@ def valida_produto(v) -> str:
 def valida_parcelas(v) -> str:
     v = _s(v)
     if not v:
-        return AGUARDANDO
+        return "Selecione o parcelamento (0x se não houver)"
     return OK if v.lower() in PARCELAS else "Corrigir Parcela"
 
 
