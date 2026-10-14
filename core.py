@@ -19,7 +19,7 @@ NAO = "NÃO"
 MAX_VALOR = 999999.99
 
 CAMPOS = [
-    ("voo", "Tipo de voo"),
+    ("voo", "Nacional ou Internacional"),
     ("ticket", "Ticket Zoho Desk"),
     ("tipo", "Tipo de emissão"),
     ("fop", "Forma de pagamento"),

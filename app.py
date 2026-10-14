@@ -5,7 +5,7 @@ from core import (CAMPOS, VOOS, NAO_APLICA, TIPOS_EMISSAO, FORMAS_PAGAMENTO, PAR
 st.set_page_config(page_title="Remarks OBT", page_icon="📝", layout="wide")
 st.markdown(
     """<style>
-    .block-container {padding-top: 1.2rem; padding-bottom: 1rem;}
+    .block-container {padding-top: 3.2rem; padding-bottom: 1rem;}
     div[data-testid="stVerticalBlock"] {gap: 0.35rem;}
     div[data-testid="stCaptionContainer"] {margin-top: -0.3rem;}
     </style>""",
