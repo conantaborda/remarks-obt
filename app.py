@@ -2,24 +2,23 @@ import streamlit as st
 from core import (CAMPOS, VOOS, NAO_APLICA, TIPOS_EMISSAO, FORMAS_PAGAMENTO, PARCELAS, PRODUTOS,
                   OK, AGUARDANDO, validar, gerar_remarks)
 
-st.set_page_config(page_title="Remarks OBT", page_icon="📝", layout="centered")
-st.title("REMARKs OBTs")
-st.caption("Preencha os campos. O texto do Remarks é gerado quando tudo estiver correto. "
-           "Cada aba do navegador tem sua própria sessão independente.")
+st.set_page_config(page_title="Remarks OBT", page_icon="📝", layout="wide")
+st.markdown("### REMARKs OBTs")
 
 # Chaves de widget; session_state é isolado por sessão/aba de cada usuário.
 K = {k: f"w_{k}" for k, _ in CAMPOS}
-LIMPA_ORIGINAL = ["voo", "ticket", "tipo", "fop", "cartao", "markup", "fee", "incentivo"]  # C3:C9 do VBA
+RESETA_NONE = ("voo", "tipo", "fop", "produto", "parcelas", "data")
 
 
-def _reset(chaves):
-    for k in chaves:
-        st.session_state[K[k]] = None if k in ("voo", "tipo", "fop", "produto", "parcelas", "data") else ""
+def _limpar():
+    for k, _ in CAMPOS:
+        st.session_state[K[k]] = None if k in RESETA_NONE else ""
 
 
-st.button("Limpar campos (C3:C9)", on_click=lambda: _reset(LIMPA_ORIGINAL),
-          help="Mesmo comportamento da macro original: limpa Ticket até Incentivo.")
-st.button("Limpar tudo", on_click=lambda: _reset([k for k, _ in CAMPOS]))
+# Resultado no topo (preenchido depois de ler os campos) + botão de limpar
+topo_txt, topo_btn = st.columns([5, 1], vertical_alignment="bottom")
+resultado = topo_txt.empty()
+topo_btn.button("Limpar campos", on_click=_limpar, use_container_width=True)
 
 HELP = {
     "voo": "Nacional (D) ou Internacional (I). Internacional habilita a companhia mandatória.",
@@ -38,34 +37,39 @@ HELP = {
 }
 SEL = {"voo": VOOS, "tipo": TIPOS_EMISSAO, "fop": FORMAS_PAGAMENTO, "produto": PRODUTOS, "parcelas": PARCELAS}
 
-dados = {}
-for key, label in CAMPOS:
-    c1, c2 = st.columns([3, 2])
-    with c1:
+
+def _fmt_status(s):
+    if s == OK:
+        return ":green[✓ OK]"
+    if s in (AGUARDANDO, NAO_APLICA):
+        return f":gray[{s}]"
+    if s.startswith(("Insira", "Selecione")):
+        return f":blue[{s}]"
+    return f":red[{s}]"
+
+
+COLS = 3
+dados, slots = {}, {}
+grade = st.columns(COLS)
+for i, (key, label) in enumerate(CAMPOS):
+    with grade[i % COLS]:
         if key in SEL:
-            dados[key] = st.selectbox(label, SEL[key], index=None, key=K[key], help=HELP[key])
+            dados[key] = st.selectbox(label, SEL[key], index=None, key=K[key], help=HELP[key],
+                                      placeholder="Selecione")
         elif key == "data":
             dados[key] = st.date_input(label, value=None, format="DD/MM/YYYY", key=K[key], help=HELP[key])
         else:
             dados[key] = st.text_input(label, key=K[key], help=HELP[key],
                                        disabled=(key == "cia" and dados.get("voo") != "Internacional"))
-    status = validar({**dados})[key]
-    with c2:
-        st.write("")
-        st.write("")
-        if status == OK:
-            st.success(status)
-        elif status in (AGUARDANDO, NAO_APLICA):
-            st.warning(status)
-        elif status.startswith("Insira"):
-            st.info(status)
-        else:
-            st.error(status)
+        slots[key] = st.empty()
 
-st.divider()
-st.subheader("Informação para inserir no Remarks do OBT (Backoffice)")
+for key, status in validar(dados).items():
+    slots[key].caption(_fmt_status(status))
+
 texto = gerar_remarks(dados)
-if texto:
-    st.code(texto, language=None)  # botão de copiar embutido
-else:
-    st.info("Preencha/corrija os campos acima para gerar o texto.")
+with resultado.container():
+    st.caption("Informação para inserir no Remarks do OBT (Backoffice)")
+    if texto:
+        st.code(texto, language=None)  # botão de copiar embutido
+    else:
+        st.info("Preencha/corrija os campos para gerar o texto.")
