@@ -26,14 +26,14 @@ HELP = {
     "tipo": "OFF = emissão offline, ON = online.",
     "fop": "VP = cartão da agência; IV = invoice; GR = órgão governamental (só cia aérea); CC = cartão cliente.",
     "cartao": "CP-XXXX (4 últimos dígitos) ou NÃO.",
-    "markup": "Valor total do markup, ou NÃO. Se não houver, 0.",
-    "fee": "Valor do FEE/RC da consolidadora, ou NÃO. Se não houver, 0.",
-    "incentivo": "Valor do incentivo acordado, ou NÃO. Se não houver, 0.",
-    "rav": "RAV para compras CC direto no emissor, ou NÃO. Se não houver, 0.",
+    "markup": "Valor total do markup. Se não houver colocar 0.",
+    "fee": "Valor do FEE/RC da consolidadora. Se não houver colocar 0.",
+    "incentivo": "Valor do incentivo acordado. Se não houver colocar 0.",
+    "rav": "RAV para compras CC direto no emissor. Se não houver colocar 0.",
     "produto": "Código do produto a ser alimentado no Wintour.",
-    "parcelas": "0x se não houver parcelamento.",
-    "data": "Entre 01/01/2000 e hoje.",
-    "cia": "Código de 2 letras da companhia mandatória.",
+    "parcelas": "0x se não houver parcelamento e 1x para a vista",
+    "data": "Data da emissão hoje.",
+    "cia": "Código de 2 letras da companhia mandatória, caso seja internacional",
 }
 SEL = {"tipo": TIPOS_EMISSAO, "fop": FORMAS_PAGAMENTO, "produto": PRODUTOS, "parcelas": PARCELAS}
 
