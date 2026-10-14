@@ -167,9 +167,8 @@ def validar(d: dict) -> dict:
 def gerar_remarks(d: dict) -> str:
     """Retorna o texto do Remarks, ou '' se houver pendências (igual à célula C16)."""
     st = validar(d)
-    opcionais = ("markup", "fee", "incentivo", "rav")
     for k, _ in CAMPOS:
-        if st[k] in (OK, NAO_APLICA) or (k in opcionais and st[k] == AGUARDANDO):
+        if st[k] in (OK, NAO_APLICA):  # "Aguardando informação" também bloqueia a geração
             continue
         return ""
     fop = _s(d.get("fop"))

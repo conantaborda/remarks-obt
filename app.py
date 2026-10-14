@@ -62,8 +62,7 @@ SEL = {"voo": VOOS, "tipo": TIPOS_EMISSAO, "fop": FORMAS_PAGAMENTO, "produto": P
 
 
 
-PLACEHOLDER = {"ticket": "#1234567", "cartao": "CP-0000", "markup": "0", "fee": "0",
-                "incentivo": "0", "rav": "0", "cia": "XX"}
+PLACEHOLDER = {"ticket": "#1234567", "cartao": "CP-0000", "cia": "XX"}
 # Ordem de preenchimento/Tab: cada linha é um st.columns próprio, então Tab segue para a direita.
 LINHAS = [
     ["voo", "cia", "ticket", "tipo", "fop"],
