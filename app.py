@@ -1,5 +1,5 @@
 import streamlit as st
-from core import (CAMPOS, TIPOS_EMISSAO, FORMAS_PAGAMENTO, PARCELAS, PRODUTOS,
+from core import (CAMPOS, VOOS, NAO_APLICA, TIPOS_EMISSAO, FORMAS_PAGAMENTO, PARCELAS, PRODUTOS,
                   OK, AGUARDANDO, validar, gerar_remarks)
 
 st.set_page_config(page_title="Remarks OBT", page_icon="📝", layout="centered")
@@ -9,12 +9,12 @@ st.caption("Preencha os campos. O texto do Remarks é gerado quando tudo estiver
 
 # Chaves de widget; session_state é isolado por sessão/aba de cada usuário.
 K = {k: f"w_{k}" for k, _ in CAMPOS}
-LIMPA_ORIGINAL = ["ticket", "tipo", "fop", "cartao", "markup", "fee", "incentivo"]  # C3:C9 do VBA
+LIMPA_ORIGINAL = ["voo", "ticket", "tipo", "fop", "cartao", "markup", "fee", "incentivo"]  # C3:C9 do VBA
 
 
 def _reset(chaves):
     for k in chaves:
-        st.session_state[K[k]] = None if k in ("tipo", "fop", "produto", "parcelas", "data") else ""
+        st.session_state[K[k]] = None if k in ("voo", "tipo", "fop", "produto", "parcelas", "data") else ""
 
 
 st.button("Limpar campos (C3:C9)", on_click=lambda: _reset(LIMPA_ORIGINAL),
@@ -22,6 +22,7 @@ st.button("Limpar campos (C3:C9)", on_click=lambda: _reset(LIMPA_ORIGINAL),
 st.button("Limpar tudo", on_click=lambda: _reset([k for k, _ in CAMPOS]))
 
 HELP = {
+    "voo": "Nacional (D) ou Internacional (I). Internacional habilita a companhia mandatória.",
     "ticket": "Formato #1234567 (até 7 dígitos).",
     "tipo": "OFF = emissão offline, ON = online.",
     "fop": "VP = cartão da agência; IV = invoice; GR = órgão governamental (só cia aérea); CC = cartão cliente.",
@@ -35,7 +36,7 @@ HELP = {
     "data": "Data da emissão hoje.",
     "cia": "Código de 2 letras da companhia mandatória, caso seja internacional",
 }
-SEL = {"tipo": TIPOS_EMISSAO, "fop": FORMAS_PAGAMENTO, "produto": PRODUTOS, "parcelas": PARCELAS}
+SEL = {"voo": VOOS, "tipo": TIPOS_EMISSAO, "fop": FORMAS_PAGAMENTO, "produto": PRODUTOS, "parcelas": PARCELAS}
 
 dados = {}
 for key, label in CAMPOS:
@@ -46,14 +47,15 @@ for key, label in CAMPOS:
         elif key == "data":
             dados[key] = st.date_input(label, value=None, format="DD/MM/YYYY", key=K[key], help=HELP[key])
         else:
-            dados[key] = st.text_input(label, key=K[key], help=HELP[key])
+            dados[key] = st.text_input(label, key=K[key], help=HELP[key],
+                                       disabled=(key == "cia" and dados.get("voo") != "Internacional"))
     status = validar({**dados})[key]
     with c2:
         st.write("")
         st.write("")
         if status == OK:
             st.success(status)
-        elif status == AGUARDANDO:
+        elif status in (AGUARDANDO, NAO_APLICA):
             st.warning(status)
         elif status.startswith("Insira"):
             st.info(status)

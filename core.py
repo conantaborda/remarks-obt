@@ -7,16 +7,19 @@ from typing import Optional
 # Listas da aba "Base"
 TIPOS_EMISSAO = ["OFF", "ON"]
 FORMAS_PAGAMENTO = ["VP", "IV", "GR", "CC"]
+VOOS = ["Nacional", "Internacional"]
 PARCELAS = [f"{i}x" for i in range(0, 13)]
 PRODUTOS = ["TKT", "REM", "AS", "BG", "HTL", "ALIM", "FLU", "SEG",
             "TAXIAEREO", "TRF", "TREM", "TKTG", "HTLG", "CAR", "ROD"]
 
 OK = "OK"
 AGUARDANDO = "Aguardando informação"
+NAO_APLICA = "Não se aplica"
 NAO = "NÃO"
 MAX_VALOR = 999999.99
 
 CAMPOS = [
+    ("voo", "Tipo de voo"),
     ("ticket", "Ticket Zoho Desk"),
     ("tipo", "Tipo de emissão"),
     ("fop", "Forma de pagamento"),
@@ -118,7 +121,16 @@ def valida_data(v) -> str:
     return OK if date(2000, 1, 1) <= v <= date.today() else "Data inválida"
 
 
-def valida_cia(v) -> str:
+def valida_voo(v) -> str:
+    v = _s(v)
+    if not v:
+        return "Selecione se o voo é Nacional ou Internacional"
+    return OK if v in VOOS else "Corrigir tipo de voo"
+
+
+def valida_cia(v, voo=None) -> str:
+    if _s(voo) == "Nacional":
+        return NAO_APLICA
     v = _s(v)
     if not v:
         return "Insira o codigo da CIA"
@@ -126,6 +138,7 @@ def valida_cia(v) -> str:
 
 
 VALIDADORES = {
+    "voo": valida_voo,
     "ticket": valida_ticket, "tipo": valida_tipo, "fop": valida_fop,
     "cartao": valida_cartao, "markup": valida_markup, "fee": valida_fee,
     "incentivo": valida_incentivo, "rav": valida_rav, "produto": valida_produto,
@@ -146,7 +159,9 @@ def _fmt_valor(v) -> str:
 
 
 def validar(d: dict) -> dict:
-    return {k: VALIDADORES[k](d.get(k)) for k, _ in CAMPOS}
+    st = {k: VALIDADORES[k](d.get(k)) for k, _ in CAMPOS if k != "cia"}
+    st["cia"] = valida_cia(d.get("cia"), d.get("voo"))
+    return st
 
 
 def gerar_remarks(d: dict) -> str:
@@ -154,7 +169,7 @@ def gerar_remarks(d: dict) -> str:
     st = validar(d)
     opcionais = ("markup", "fee", "incentivo", "rav")
     for k, _ in CAMPOS:
-        if st[k] == OK or (k in opcionais and st[k] == AGUARDANDO):
+        if st[k] in (OK, NAO_APLICA) or (k in opcionais and st[k] == AGUARDANDO):
             continue
         return ""
     fop = _s(d.get("fop"))
@@ -164,6 +179,10 @@ def gerar_remarks(d: dict) -> str:
         _fmt_valor(d.get("markup")), _fmt_valor(d.get("fee")),
         _fmt_valor(d.get("incentivo")), _fmt_valor(d.get("rav")),
         _s(d.get("produto")), _s(d.get("parcelas")),
-        d["data"].strftime("%d/%m/%Y"), _s(d.get("cia")),
+        d["data"].strftime("%d/%m/%Y"),
     ]
-    return ";".join(p for p in partes if p != "")  # TEXTJOIN ignora vazios
+    texto = ";".join(p for p in partes if p != "")  # TEXTJOIN ignora vazios
+    # Marcador D (nacional) / I (internacional) sempre presente; cia só se internacional.
+    if _s(d.get("voo")) == "Internacional":
+        return f"{texto};I;{_s(d.get('cia'))}"
+    return f"{texto};D;"
