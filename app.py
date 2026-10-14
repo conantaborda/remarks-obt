@@ -38,6 +38,14 @@ def _on_fop():
             st.session_state[K["parcelas"]] = None
 
 
+def _on_voo():
+    """Nacional: cia mandatória = 0 (travada). Internacional: limpa o 0 para digitar a cia."""
+    if st.session_state.get(K["voo"]) == "Nacional":
+        st.session_state[K["cia"]] = "0"
+    elif (st.session_state.get(K["cia"]) or "").strip() == "0":
+        st.session_state[K["cia"]] = ""
+
+
 # Resultado no topo (preenchido depois de ler os campos) + botão de limpar
 topo_txt, topo_btn = st.columns([6, 1], vertical_alignment="bottom")
 resultado = topo_txt.empty()
@@ -96,7 +104,7 @@ for linha in LINHAS:
             if key in SEL:
                 dados[key] = st.selectbox(label, SEL[key], index=None, key=K[key], placeholder="Selecione",
                                           disabled=travado,
-                                          on_change=_on_fop if key == "fop" else None)
+                                          on_change={"fop": _on_fop, "voo": _on_voo}.get(key))
             elif key == "data":
                 dados[key] = st.date_input(label, value=None, format="DD/MM/YYYY", key=K[key])
             else:

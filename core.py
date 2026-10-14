@@ -184,4 +184,4 @@ def gerar_remarks(d: dict) -> str:
     # Marcador D (nacional) / I (internacional) sempre presente; cia só se internacional.
     if _s(d.get("voo")) == "Internacional":
         return f"{texto};I;{_s(d.get('cia'))}"
-    return f"{texto};D;"
+    return f"{texto};D;0"
