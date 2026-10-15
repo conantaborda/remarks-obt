@@ -19,7 +19,6 @@ st.markdown(
     </style>""",
     unsafe_allow_html=True,
 )
-st.markdown("### REMARKs OBTs")
 
 # Chaves de widget; session_state é isolado por sessão/aba de cada usuário.
 K = {k: f"w_{k}" for k, _ in CAMPOS}
@@ -55,9 +54,10 @@ def _on_voo():
 
 
 # Resultado no topo (preenchido depois de ler os campos) + botão de limpar
-topo_txt, topo_btn = st.columns([6, 1], vertical_alignment="bottom")
-resultado = topo_txt.empty()
-topo_btn.button("Limpar campos", on_click=_limpar, use_container_width=True)
+cab_tit, cab_btn = st.columns([5, 1], vertical_alignment="center")
+cab_tit.markdown("### REMARKs OBTs")
+cab_btn.button("Limpar campos", on_click=_limpar, use_container_width=True)
+resultado = st.empty()
 
 HELP = {
     "voo": "Nacional (D) ou Internacional (I). Internacional habilita a companhia mandatória.",
