@@ -8,6 +8,14 @@ st.markdown(
     .block-container {padding-top: 3.2rem; padding-bottom: 1rem;}
     div[data-testid="stVerticalBlock"] {gap: 0.35rem;}
     div[data-testid="stCaptionContainer"] {margin-top: -0.3rem;}
+    /* Texto gerado: destaque verde, fonte maior, para não se confundir com os campos */
+    div[data-testid="stCode"] {
+        border: 2px solid #2ea043; border-radius: 8px; background: rgba(46, 160, 67, 0.12);
+    }
+    div[data-testid="stCode"] pre, div[data-testid="stCode"] code {
+        background: transparent !important; font-size: 1.05rem; font-weight: 600;
+        white-space: pre-wrap; word-break: break-all;
+    }
     </style>""",
     unsafe_allow_html=True,
 )
@@ -119,6 +127,7 @@ texto = gerar_remarks(dados)
 with resultado.container():
     st.caption("Informação para inserir no Remarks do OBT (Backoffice)")
     if texto:
+        st.caption(":green[✓ Texto pronto — copie pelo ícone à direita]")
         st.code(texto, language=None)  # botão de copiar embutido
     else:
         st.info("Preencha/corrija os campos para gerar o texto.")
